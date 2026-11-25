@@ -10,4 +10,5 @@ __pycache__/
 
 # Reports
 /reports/runs/
+/reports/runs_dl/
 /reports/figures/

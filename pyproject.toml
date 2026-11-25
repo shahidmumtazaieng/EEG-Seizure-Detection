@@ -19,6 +19,11 @@ dependencies = [
   "torch>=2.2",
 ]
 
+[project.optional-dependencies]
+dashboard = [
+  "streamlit>=1.36",
+]
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 

@@ -17,6 +17,7 @@ if str(SRC_DIR) not in sys.path:
 
 from eeg_seizure.modeling import (
     CVConfig,
+    add_window_metadata,
     cross_val_predict_grouped,
     make_models,
     random_split_baseline,
@@ -69,6 +70,7 @@ def main() -> None:
         print(f"Evaluating: {name}")
         y_prob, fold_ids = cross_val_predict_grouped(model, X, y, groups, config)
         pred_df, metrics = summarize_predictions(name, y, y_prob, groups, fold_ids)
+        pred_df = add_window_metadata(pred_df, blob)
 
         pred_df.to_csv(run_dir / f"predictions_{name}.csv", index=False)
         save_metrics_json(metrics, run_dir / f"metrics_{name}.json")
@@ -95,6 +97,7 @@ def main() -> None:
                 groups,
                 random_fold_ids,
             )
+            random_pred_df = add_window_metadata(random_pred_df, blob)
             random_pred_df.to_csv(run_dir / f"predictions_{name}_random_split.csv", index=False)
             save_metrics_json(random_metrics, run_dir / f"metrics_{name}_random_split.json")
             all_metrics.append(

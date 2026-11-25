@@ -17,7 +17,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from eeg_seizure.dl import EEGCNN1D, TrainConfig, evaluate_binary, predict_probs, train_one_fold
-from eeg_seizure.modeling import CVConfig, get_splitter
+from eeg_seizure.modeling import CVConfig, add_window_metadata, get_splitter
 
 
 def parse_args() -> argparse.Namespace:
@@ -142,6 +142,7 @@ def main() -> None:
             "fold": fold_ids,
         }
     )
+    pred_df = add_window_metadata(pred_df, blob)
     pred_df.to_csv(run_dir / "predictions_eegcnn1d.csv", index=False)
 
     summary_df = pd.DataFrame([{"model": "eegcnn1d", "evaluation": f"grouped_{args.cv}", **metrics}])

@@ -203,3 +203,32 @@ def summarize_predictions(
         }
     )
     return pred_df, metrics
+
+
+def add_window_metadata(
+    predictions: pd.DataFrame, dataset: np.lib.npyio.NpzFile
+) -> pd.DataFrame:
+    """Attach EDF filename and window timing when the prepared dataset has them."""
+    has_files = "files" in dataset.files
+    has_starts = "window_start_sec" in dataset.files
+    if not has_files and not has_starts:
+        return predictions
+    if has_files != has_starts:
+        raise ValueError("Dataset must provide both 'files' and 'window_start_sec' metadata")
+
+    files = np.asarray(dataset["files"]).astype(str).reshape(-1)
+    starts = np.asarray(dataset["window_start_sec"], dtype=float).reshape(-1)
+    if len(files) != len(predictions) or len(starts) != len(predictions):
+        raise ValueError("Dataset window metadata length does not match prediction count")
+    if "window_sec" not in dataset.files:
+        raise ValueError("Dataset is missing 'window_sec' required for interval visualization")
+
+    window_sec = np.asarray(dataset["window_sec"], dtype=float).reshape(-1)
+    if len(window_sec) != 1 or not np.isfinite(window_sec[0]) or window_sec[0] <= 0:
+        raise ValueError("Dataset 'window_sec' must contain one positive finite value")
+
+    result = predictions.copy()
+    result["file"] = files
+    result["window_start_sec"] = starts
+    result["window_sec"] = float(window_sec[0])
+    return result
